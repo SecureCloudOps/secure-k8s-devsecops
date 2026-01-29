@@ -10,17 +10,6 @@ module "vpc" {
   azs                  = var.azs
   public_subnet_cidrs  = var.public_subnet_cidrs
   private_subnet_cidrs = var.private_subnet_cidrs
-
-  lifecycle {
-    precondition {
-      condition     = length(var.public_subnet_cidrs) == length(var.azs)
-      error_message = "public_subnet_cidrs must match the number of azs."
-    }
-    precondition {
-      condition     = length(var.private_subnet_cidrs) == length(var.azs)
-      error_message = "private_subnet_cidrs must match the number of azs."
-    }
-  }
 }
 
 module "eks" {

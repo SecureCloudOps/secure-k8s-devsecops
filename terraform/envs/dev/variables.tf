@@ -55,10 +55,6 @@ variable "private_subnet_cidrs" {
 variable "azs" {
   type        = list(string)
   description = "List of availability zones to use."
-  validation {
-    condition     = length(var.azs) == 2
-    error_message = "azs must contain exactly 2 availability zones."
-  }
 }
 
 variable "cluster_version" {
