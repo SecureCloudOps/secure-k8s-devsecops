@@ -2,6 +2,10 @@ data "tls_certificate" "github" {
   url = "https://token.actions.githubusercontent.com"
 }
 
+data "aws_partition" "current" {}
+data "aws_region" "current" {}
+data "aws_caller_identity" "current" {}
+
 resource "aws_iam_openid_connect_provider" "github" {
   url             = "https://token.actions.githubusercontent.com"
   client_id_list  = ["sts.amazonaws.com"]
@@ -41,6 +45,43 @@ resource "aws_iam_role" "this" {
 
 # Minimal Terraform permissions for VPC/EKS/ECR/Logs in this repo.
 data "aws_iam_policy_document" "terraform" {
+  statement {
+    sid = "StateBucketList"
+    actions = [
+      "s3:ListBucket"
+    ]
+    resources = [
+      "arn:${data.aws_partition.current.partition}:s3:::secure-k8s-terraform-state-bucket"
+    ]
+  }
+
+  statement {
+    sid = "StateBucketObjects"
+    actions = [
+      "s3:GetObject",
+      "s3:PutObject",
+      "s3:DeleteObject"
+    ]
+    resources = [
+      "arn:${data.aws_partition.current.partition}:s3:::secure-k8s-terraform-state-bucket/bootstrap/*",
+      "arn:${data.aws_partition.current.partition}:s3:::secure-k8s-terraform-state-bucket/envs/dev/*"
+    ]
+  }
+
+  statement {
+    sid = "StateLockTable"
+    actions = [
+      "dynamodb:GetItem",
+      "dynamodb:PutItem",
+      "dynamodb:DeleteItem",
+      "dynamodb:UpdateItem",
+      "dynamodb:DescribeTable"
+    ]
+    resources = [
+      "arn:${data.aws_partition.current.partition}:dynamodb:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:table/secure-k8s-terraform-lock-table"
+    ]
+  }
+
   statement {
     sid = "EC2VPC"
     actions = [
