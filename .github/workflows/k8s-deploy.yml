@@ -1,0 +1,13 @@
+name: k8s-deploy
+
+on:
+  workflow_dispatch:
+
+# Placeholder: will be used later for kubectl and app deployment with a separate IAM role.
+
+jobs:
+  placeholder:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Placeholder
+        run: echo "k8s deploy workflow placeholder"

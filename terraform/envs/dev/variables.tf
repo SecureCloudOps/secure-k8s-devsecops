@@ -38,8 +38,8 @@ variable "public_subnet_cidrs" {
   type        = list(string)
   description = "Public subnet CIDR blocks (one per AZ)."
   validation {
-    condition     = length(var.public_subnet_cidrs) == length(var.azs)
-    error_message = "public_subnet_cidrs must match the number of azs."
+    condition     = length(var.public_subnet_cidrs) > 0
+    error_message = "public_subnet_cidrs must not be empty."
   }
 }
 
@@ -47,8 +47,8 @@ variable "private_subnet_cidrs" {
   type        = list(string)
   description = "Private subnet CIDR blocks (one per AZ)."
   validation {
-    condition     = length(var.private_subnet_cidrs) == length(var.azs)
-    error_message = "private_subnet_cidrs must match the number of azs."
+    condition     = length(var.private_subnet_cidrs) > 0
+    error_message = "private_subnet_cidrs must not be empty."
   }
 }
 

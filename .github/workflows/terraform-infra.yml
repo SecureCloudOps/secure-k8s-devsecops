@@ -1,0 +1,120 @@
+name: terraform-infra
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "Terraform action"
+        type: choice
+        options:
+          - plan
+          - apply
+          - destroy
+        required: true
+      environment:
+        description: "Target environment"
+        type: choice
+        options:
+          - dev
+        required: true
+      confirm_destroy:
+        description: "Type DESTROY to confirm"
+        required: false
+        type: string
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  TF_INPUT: "false"
+  TF_IN_AUTOMATION: "true"
+  TF_WORKDIR: terraform/envs/dev
+
+jobs:
+  plan:
+    if: ${{ inputs.action == 'plan' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.6.6"
+          terraform_wrapper: false
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.TF_GITHUB_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Terraform fmt
+        run: terraform fmt -check -recursive
+
+      - name: Terraform init
+        run: terraform -chdir=$TF_WORKDIR init -input=false
+
+      - name: Terraform validate
+        run: terraform -chdir=$TF_WORKDIR validate
+
+      - name: Terraform plan
+        run: terraform -chdir=$TF_WORKDIR plan -input=false -out=tfplan
+
+      - name: Upload plan
+        uses: actions/upload-artifact@v4
+        with:
+          name: tfplan-${{ inputs.environment }}
+          path: terraform/envs/dev/tfplan
+
+  apply:
+    if: ${{ inputs.action == 'apply' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.6.6"
+          terraform_wrapper: false
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.TF_GITHUB_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Terraform init
+        run: terraform -chdir=$TF_WORKDIR init -input=false
+
+      - name: Terraform apply
+        run: terraform -chdir=$TF_WORKDIR apply -input=false -auto-approve
+
+  destroy:
+    if: ${{ inputs.action == 'destroy' && inputs.confirm_destroy == 'DESTROY' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.6.6"
+          terraform_wrapper: false
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.TF_GITHUB_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Terraform init
+        run: terraform -chdir=$TF_WORKDIR init -input=false
+
+      - name: Terraform destroy
+        run: terraform -chdir=$TF_WORKDIR destroy -input=false -auto-approve
