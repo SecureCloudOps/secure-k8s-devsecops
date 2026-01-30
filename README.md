@@ -18,6 +18,21 @@ Production-grade, security-first Kubernetes platform on AWS EKS with Terraform, 
 - Terraform plan/apply/destroy are manual-only via GitHub Actions workflow_dispatch
 - No static AWS keys or secrets stored in the repository
 
+## GitHub Actions Variables
+- Set repository variables in GitHub Settings → Secrets and variables → Actions → Variables
+- `TF_GITHUB_ROLE_ARN` must be an IAM role ARN (not a policy ARN)
+- Provide all required `TF_VAR_*` variables used by the Terraform workflow
+
+## Running Terraform Workflows
+- Use the `terraform-infra` workflow and select `plan`, `apply`, or `destroy`
+- `destroy` requires the confirm input `DESTROY`
+- No static AWS keys are used, and no `terraform.tfvars` is committed
+
+## Local Usage
+- Copy `terraform/envs/dev/terraform.tfvars.example` to `terraform/envs/dev/terraform.tfvars`
+- Run `terraform init` and `terraform plan` from `terraform/envs/dev`
+- `terraform/envs/dev/terraform.tfvars` is gitignored
+
 ## Repository Structure
 - app/                     FastAPI service
 - terraform/               Infrastructure as code

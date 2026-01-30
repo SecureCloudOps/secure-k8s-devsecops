@@ -1,28 +1,28 @@
-aws_region = "us-east-1"
+aws_region = "us-east-1"  # Change to your desired AWS region
 
-project_name = "secure-k8s"
+project_name = "your-project-name"  # Replace with your project name
 environment  = "dev"
 
-vpc_cidr = "10.0.0.0/16"
+vpc_cidr = "10.0.0.0/16"  # Customize CIDR range if needed
 
-azs = ["us-east-1a", "us-east-1b"]
+azs = ["us-east-1a", "us-east-1b"]  # Change to your preferred availability zones
 
-public_subnet_cidrs  = ["10.0.1.0/24", "10.0.2.0/24"]
-private_subnet_cidrs = ["10.0.11.0/24", "10.0.12.0/24"]
+public_subnet_cidrs  = ["10.0.1.0/24", "10.0.2.0/24"]  # Customize subnet ranges
+private_subnet_cidrs = ["10.0.11.0/24", "10.0.12.0/24"]  # Customize subnet ranges
 
-cluster_version = "1.29"
+cluster_version = "1.29"  # EKS cluster version
 
-node_instance_types = ["t3.medium"]
-node_desired_size   = 2
-node_min_size       = 1
-node_max_size       = 3
+node_instance_types = ["t3.medium"]  # EC2 instance type for worker nodes
+node_desired_size   = 2  # Desired number of worker nodes
+node_min_size       = 1  # Minimum number of worker nodes
+node_max_size       = 3  # Maximum number of worker nodes
 
-ecr_repo_name = "secure-api"
+ecr_repo_name = "your-ecr-repo-name"  # Replace with your ECR repository name
 
-github_repo   = "SecureCloudOps/secure-k8s-devsecops"
-github_branch = "main"
+github_repo   = "your-github-org/your-repo-name"  # Replace with your GitHub repository
+github_branch = "main"  # Git branch to deploy from
 
 tags = {
-  Project     = "secure-k8s-devsecops"
+  Project     = "your-project-name"  # Replace with your project name
   Environment = "dev"
 }

@@ -1,8 +1,8 @@
-aws_region       = "us-east-1"
-state_bucket_name = "your-terraform-state-bucket"
-lock_table_name   = "your-terraform-lock-table"
+aws_region       = "us-east-1"  # Change to your desired AWS region
+state_bucket_name = "your-terraform-state-bucket"  # Replace with your S3 bucket name for Terraform state
+lock_table_name   = "your-terraform-lock-table"  # Replace with your DynamoDB table name for state locking
 
 tags = {
-  Project     = "secure-k8s-devsecops"
-  Environment = "dev"
+  Project     = "your-project-name"  # Replace with your project name
+  Environment = "dev"  # Environment name
 }

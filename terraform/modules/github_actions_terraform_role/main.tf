@@ -64,7 +64,6 @@ data "aws_iam_policy_document" "terraform" {
       "s3:DeleteObject"
     ]
     resources = [
-      "arn:${data.aws_partition.current.partition}:s3:::secure-k8s-terraform-state-bucket/bootstrap/*",
       "arn:${data.aws_partition.current.partition}:s3:::secure-k8s-terraform-state-bucket/envs/dev/*"
     ]
   }
