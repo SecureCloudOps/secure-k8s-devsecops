@@ -48,7 +48,8 @@ data "aws_iam_policy_document" "terraform" {
   statement {
     sid = "StateBucketList"
     actions = [
-      "s3:ListBucket"
+      "s3:ListBucket",
+      "s3:GetBucketLocation"
     ]
     resources = [
       "arn:${data.aws_partition.current.partition}:s3:::secure-k8s-terraform-state-bucket"
