@@ -47,20 +47,25 @@ env:
   TF_INPUT: "false"
   TF_IN_AUTOMATION: "true"
   TF_WORKDIR: terraform/envs/dev
-  TF_VAR_aws_region: ${{ vars.TF_VAR_aws_region }}
-  TF_VAR_project_name: ${{ vars.TF_VAR_project_name }}
-  TF_VAR_environment: ${{ vars.TF_VAR_environment }}
-  TF_VAR_vpc_cidr: ${{ vars.TF_VAR_vpc_cidr }}
-  TF_VAR_azs: ${{ vars.TF_VAR_azs }}
-  TF_VAR_public_subnet_cidrs: ${{ vars.TF_VAR_public_subnet_cidrs }}
-  TF_VAR_private_subnet_cidrs: ${{ vars.TF_VAR_private_subnet_cidrs }}
-  TF_VAR_cluster_version: ${{ vars.TF_VAR_cluster_version }}
-  TF_VAR_node_instance_types: ${{ vars.TF_VAR_node_instance_types }}
-  TF_VAR_node_desired_size: ${{ vars.TF_VAR_node_desired_size }}
-  TF_VAR_node_min_size: ${{ vars.TF_VAR_node_min_size }}
-  TF_VAR_node_max_size: ${{ vars.TF_VAR_node_max_size }}
-  TF_VAR_ecr_repo_name: ${{ vars.TF_VAR_ecr_repo_name }}
-  TF_VAR_github_repo: ${{ vars.TF_VAR_github_repo }}
+
+  TF_VAR_aws_region: ${{ vars.TF_VAR_AWS_REGION }}
+  TF_VAR_project_name: ${{ vars.TF_VAR_PROJECT_NAME }}
+  TF_VAR_environment: ${{ vars.TF_VAR_ENVIRONMENT }}
+  TF_VAR_vpc_cidr: ${{ vars.TF_VAR_VPC_CIDR }}
+
+  TF_VAR_azs: ${{ vars.TF_VAR_AZS }}
+  TF_VAR_public_subnet_cidrs: ${{ vars.TF_VAR_PUBLIC_SUBNET_CIDRS }}
+  TF_VAR_private_subnet_cidrs: ${{ vars.TF_VAR_PRIVATE_SUBNET_CIDRS }}
+
+  TF_VAR_cluster_version: ${{ vars.TF_VAR_CLUSTER_VERSION }}
+  TF_VAR_node_instance_types: ${{ vars.TF_VAR_NODE_INSTANCE_TYPES }}
+  TF_VAR_node_desired_size: ${{ vars.TF_VAR_NODE_DESIRED_SIZE }}
+  TF_VAR_node_min_size: ${{ vars.TF_VAR_NODE_MIN_SIZE }}
+  TF_VAR_node_max_size: ${{ vars.TF_VAR_NODE_MAX_SIZE }}
+
+  TF_VAR_ecr_repo_name: ${{ vars.TF_VAR_ECR_REPO_NAME }}
+  TF_VAR_github_repo: ${{ vars.TF_VAR_GITHUB_REPO }}
+  
 
 jobs:
   plan:
