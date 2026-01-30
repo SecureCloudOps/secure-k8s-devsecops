@@ -109,6 +109,7 @@ data "aws_iam_policy_document" "terraform" {
       "ec2:DescribeAccountAttributes",
       "ec2:DescribeAvailabilityZones",
       "ec2:DescribeAddresses",
+      "ec2:DescribeAddressesAttribute",
       "ec2:DescribeInternetGateways",
       "ec2:DescribeNatGateways",
       "ec2:DescribeNetworkInterfaces",
@@ -117,6 +118,7 @@ data "aws_iam_policy_document" "terraform" {
       "ec2:DescribeSubnets",
       "ec2:DescribeTags",
       "ec2:DescribeVpcs",
+      "ec2:DescribeVpcAttribute",
       "ec2:DetachInternetGateway",
       "ec2:DisassociateRouteTable",
       "ec2:ModifySubnetAttribute",
@@ -154,8 +156,12 @@ data "aws_iam_policy_document" "terraform" {
       "iam:CreateRole",
       "iam:DeleteRole",
       "iam:DetachRolePolicy",
+      "iam:GetOpenIDConnectProvider",
+      "iam:GetPolicy",
       "iam:GetRole",
+      "iam:GetRolePolicy",
       "iam:ListAttachedRolePolicies",
+      "iam:ListRolePolicies",
       "iam:PassRole",
       "iam:TagRole",
       "iam:UntagRole"
@@ -168,7 +174,8 @@ data "aws_iam_policy_document" "terraform" {
     actions = [
       "ecr:DescribeRepositories",
       "ecr:ListImages",
-      "ecr:BatchGetImage"
+      "ecr:BatchGetImage",
+      "ecr:ListTagsForResource"
     ]
     resources = ["*"]
   }
