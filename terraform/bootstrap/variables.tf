@@ -26,6 +26,20 @@ variable "lock_table_name" {
   }
 }
 
+variable "github_repo" {
+  type        = string
+  description = "GitHub repository in OWNER/REPO format for OIDC trust."
+  validation {
+    condition     = length(var.github_repo) > 0
+    error_message = "github_repo must be a non-empty string."
+  }
+}
+
+variable "github_branch" {
+  type        = string
+  description = "GitHub branch allowed to assume the role."
+}
+
 variable "tags" {
   type        = map(string)
   description = "Tags applied to bootstrap resources."

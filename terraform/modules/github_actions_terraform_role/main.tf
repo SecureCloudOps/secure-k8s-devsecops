@@ -52,7 +52,7 @@ data "aws_iam_policy_document" "terraform" {
       "s3:GetBucketLocation"
     ]
     resources = [
-      "arn:${data.aws_partition.current.partition}:s3:::secure-k8s-terraform-state-bucket"
+      "arn:${data.aws_partition.current.partition}:s3:::${var.state_bucket_name}"
     ]
   }
 
@@ -64,7 +64,7 @@ data "aws_iam_policy_document" "terraform" {
       "s3:DeleteObject"
     ]
     resources = [
-      "arn:${data.aws_partition.current.partition}:s3:::secure-k8s-terraform-state-bucket/envs/dev/*"
+      "arn:${data.aws_partition.current.partition}:s3:::${var.state_bucket_name}/envs/dev/*"
     ]
   }
 
@@ -75,10 +75,12 @@ data "aws_iam_policy_document" "terraform" {
       "dynamodb:PutItem",
       "dynamodb:DeleteItem",
       "dynamodb:UpdateItem",
-      "dynamodb:DescribeTable"
+      "dynamodb:DescribeTable",
+      "dynamodb:Query",
+      "dynamodb:Scan"
     ]
     resources = [
-      "arn:${data.aws_partition.current.partition}:dynamodb:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:table/secure-k8s-terraform-lock-table"
+      "arn:${data.aws_partition.current.partition}:dynamodb:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:table/${var.lock_table_name}"
     ]
   }
 
@@ -162,6 +164,7 @@ data "aws_iam_policy_document" "terraform" {
       "iam:GetRolePolicy",
       "iam:ListAttachedRolePolicies",
       "iam:ListRolePolicies",
+      "iam:ListOpenIDConnectProviders",
       "iam:PassRole",
       "iam:TagRole",
       "iam:UntagRole"
@@ -173,6 +176,7 @@ data "aws_iam_policy_document" "terraform" {
     sid = "ECRRead"
     actions = [
       "ecr:DescribeRepositories",
+      "ecr:DescribeImages",
       "ecr:ListImages",
       "ecr:BatchGetImage",
       "ecr:ListTagsForResource"

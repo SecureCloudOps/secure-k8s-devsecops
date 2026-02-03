@@ -26,23 +26,6 @@ permissions:
   id-token: write
   contents: read
 
-# Required repo variables:
-# TF_GITHUB_ROLE_ARN
-# TF_VAR_aws_region
-# TF_VAR_project_name
-# TF_VAR_environment
-# TF_VAR_vpc_cidr
-# TF_VAR_azs
-# TF_VAR_public_subnet_cidrs
-# TF_VAR_private_subnet_cidrs
-# TF_VAR_cluster_version
-# TF_VAR_node_instance_types
-# TF_VAR_node_desired_size
-# TF_VAR_node_min_size
-# TF_VAR_node_max_size
-# TF_VAR_ecr_repo_name
-# TF_VAR_github_repo
-
 env:
   TF_INPUT: "false"
   TF_IN_AUTOMATION: "true"
@@ -51,8 +34,9 @@ env:
   TF_VAR_aws_region: ${{ vars.TF_VAR_AWS_REGION }}
   TF_VAR_project_name: ${{ vars.TF_VAR_PROJECT_NAME }}
   TF_VAR_environment: ${{ vars.TF_VAR_ENVIRONMENT }}
-  TF_VAR_vpc_cidr: ${{ vars.TF_VAR_VPC_CIDR }}
+  TF_VAR_cluster_name: ${{ vars.TF_VAR_CLUSTER_NAME }}
 
+  TF_VAR_vpc_cidr: ${{ vars.TF_VAR_VPC_CIDR }}
   TF_VAR_azs: ${{ vars.TF_VAR_AZS }}
   TF_VAR_public_subnet_cidrs: ${{ vars.TF_VAR_PUBLIC_SUBNET_CIDRS }}
   TF_VAR_private_subnet_cidrs: ${{ vars.TF_VAR_PRIVATE_SUBNET_CIDRS }}
@@ -65,7 +49,6 @@ env:
 
   TF_VAR_ecr_repo_name: ${{ vars.TF_VAR_ECR_REPO_NAME }}
   TF_VAR_github_repo: ${{ vars.TF_VAR_GITHUB_REPO }}
-  
 
 jobs:
   plan:
@@ -95,6 +78,10 @@ jobs:
 
       - name: Terraform validate
         run: terraform -chdir=$TF_WORKDIR validate
+
+      - name: Sanity check TF vars present
+        run: |
+          env | sort | grep '^TF_VAR_' | sed 's/=.*$/=***masked***/'
 
       - name: Terraform plan
         run: terraform -chdir=$TF_WORKDIR plan -input=false -out=tfplan

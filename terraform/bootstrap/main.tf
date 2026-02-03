@@ -43,3 +43,12 @@ resource "aws_dynamodb_table" "lock" {
 
   tags = var.tags
 }
+
+module "github_actions_terraform_role" {
+  source = "../modules/github_actions_terraform_role"
+
+  name   = "secure-k8s-dev-terraform-oidc"
+  repo   = var.github_repo
+  branch = var.github_branch
+  tags   = var.tags
+}

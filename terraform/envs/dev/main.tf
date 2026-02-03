@@ -31,12 +31,3 @@ module "ecr" {
 
   name = var.ecr_repo_name
 }
-
-module "github_actions_terraform_role" {
-  source = "../../modules/github_actions_terraform_role"
-
-  name   = "${local.name}-terraform-oidc"
-  repo   = var.github_repo
-  branch = var.github_branch
-  tags   = var.tags
-}
