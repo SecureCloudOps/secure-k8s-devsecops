@@ -92,6 +92,9 @@ data "aws_iam_policy_document" "terraform" {
       "ec2:AttachInternetGateway",
       "ec2:AuthorizeSecurityGroupEgress",
       "ec2:AuthorizeSecurityGroupIngress",
+      "ec2:RevokeSecurityGroupEgress",
+      "ec2:RevokeSecurityGroupIngress",
+      "ec2:DeleteSecurityGroupRule",
       "ec2:CreateInternetGateway",
       "ec2:CreateNatGateway",
       "ec2:CreateRoute",
@@ -173,13 +176,16 @@ data "aws_iam_policy_document" "terraform" {
   }
 
   statement {
-    sid = "ECRRead"
+    sid = "ECR"
     actions = [
+      "ecr:CreateRepository",
+      "ecr:DeleteRepository",
       "ecr:DescribeRepositories",
-      "ecr:DescribeImages",
-      "ecr:ListImages",
-      "ecr:BatchGetImage",
-      "ecr:ListTagsForResource"
+      "ecr:ListTagsForResource",
+      "ecr:TagResource",
+      "ecr:UntagResource",
+      "ecr:PutLifecyclePolicy",
+      "ecr:DeleteLifecyclePolicy"
     ]
     resources = ["*"]
   }
