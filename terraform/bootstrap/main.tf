@@ -51,4 +51,7 @@ module "github_actions_terraform_role" {
   repo   = var.github_repo
   branch = var.github_branch
   tags   = var.tags
+
+  state_bucket_name = var.state_bucket_name
+  lock_table_name   = var.lock_table_name
 }
