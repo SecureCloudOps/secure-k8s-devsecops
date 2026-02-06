@@ -130,6 +130,20 @@ data "aws_iam_policy_document" "terraform" {
       "ec2:ModifyVpcAttribute",
       "ec2:ReleaseAddress"
     ]
+    # TODO: Scope to VPC/subnet/sg ARNs once stable resource ARNs are known.
+    resources = ["*"]
+  }
+
+  statement {
+    sid = "EC2Instance"
+    actions = [
+      "ec2:RunInstances",
+      "ec2:TerminateInstances",
+      "ec2:DescribeInstances",
+      "ec2:DescribeInstanceStatus",
+      "ec2:DescribeInstanceTypes"
+    ]
+    # TODO: Scope to specific AMI, subnet, and security group ARNs.
     resources = ["*"]
   }
 
@@ -161,6 +175,11 @@ data "aws_iam_policy_document" "terraform" {
       "iam:CreateRole",
       "iam:DeleteRole",
       "iam:DetachRolePolicy",
+      "iam:CreateInstanceProfile",
+      "iam:DeleteInstanceProfile",
+      "iam:GetInstanceProfile",
+      "iam:AddRoleToInstanceProfile",
+      "iam:RemoveRoleFromInstanceProfile",
       "iam:GetOpenIDConnectProvider",
       "iam:GetPolicy",
       "iam:GetRole",
@@ -172,6 +191,7 @@ data "aws_iam_policy_document" "terraform" {
       "iam:TagRole",
       "iam:UntagRole"
     ]
+    # TODO: Scope to specific role/profile ARNs for runner and cluster roles.
     resources = ["*"]
   }
 
