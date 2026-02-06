@@ -2,12 +2,74 @@ name: k8s-deploy
 
 on:
   workflow_dispatch:
+  workflow_run:
+    workflows: ["ci"]
+    types: [completed]
 
-# Placeholder: will be used later for kubectl and app deployment with a separate IAM role.
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: k8s-deploy-main
+  cancel-in-progress: false
+
+env:
+  AWS_REGION: ${{ vars.TF_VAR_AWS_REGION }}
+  CLUSTER_NAME: ${{ vars.TF_VAR_CLUSTER_NAME }}
+  ECR_REPO: ${{ vars.TF_VAR_ECR_REPO_NAME }}
 
 jobs:
-  placeholder:
+  deploy:
+    if: ${{ github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main') }}
     runs-on: ubuntu-latest
+
     steps:
-      - name: Placeholder
-        run: echo "k8s deploy workflow placeholder"
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.TF_GITHUB_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Set IMAGE_TAG
+        shell: bash
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_run" ]]; then
+            echo "IMAGE_TAG=${{ github.event.workflow_run.head_sha }}" >> "$GITHUB_ENV"
+          else
+            echo "IMAGE_TAG=${{ github.sha }}" >> "$GITHUB_ENV"
+          fi
+
+      - name: Debug (safe)
+        run: |
+          echo "AWS_REGION=$AWS_REGION"
+          echo "CLUSTER_NAME=$CLUSTER_NAME"
+          echo "ECR_REPO=$ECR_REPO"
+          echo "IMAGE_TAG=$IMAGE_TAG"
+          aws sts get-caller-identity
+
+      - name: Get AWS Account ID
+        run: |
+          echo "ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)" >> "$GITHUB_ENV"
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: "v1.29.0"
+
+      - name: Update kubeconfig
+        run: |
+          aws eks update-kubeconfig --name "$CLUSTER_NAME" --region "$AWS_REGION"
+
+      - name: Deploy manifests
+        run: |
+          kubectl apply -k k8s/base
+
+      - name: Set image to CI commit SHA
+        run: |
+          IMAGE_URI="$ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG"
+          kubectl -n default set image deployment/secure-api secure-api="$IMAGE_URI"
+          kubectl -n default rollout status deployment/secure-api
