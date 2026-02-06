@@ -115,6 +115,7 @@ data "aws_iam_policy_document" "terraform" {
       "ec2:DescribeAvailabilityZones",
       "ec2:DescribeAddresses",
       "ec2:DescribeAddressesAttribute",
+      "ec2:DescribeImages",
       "ec2:DescribeInternetGateways",
       "ec2:DescribeNatGateways",
       "ec2:DescribeNetworkInterfaces",
