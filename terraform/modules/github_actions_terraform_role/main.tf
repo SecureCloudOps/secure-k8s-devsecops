@@ -117,6 +117,7 @@ data "aws_iam_policy_document" "terraform" {
       "ec2:DescribeAddressesAttribute",
       "ec2:DescribeImages",
       "ec2:DescribeInstanceAttribute",
+      "ec2:DescribeInstanceCreditSpecifications",
       "ec2:DescribeInternetGateways",
       "ec2:DescribeNatGateways",
       "ec2:DescribeNetworkInterfaces",
