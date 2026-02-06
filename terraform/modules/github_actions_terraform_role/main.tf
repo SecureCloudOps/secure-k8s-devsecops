@@ -116,6 +116,7 @@ data "aws_iam_policy_document" "terraform" {
       "ec2:DescribeAddresses",
       "ec2:DescribeAddressesAttribute",
       "ec2:DescribeImages",
+      "ec2:DescribeInstanceAttribute",
       "ec2:DescribeInternetGateways",
       "ec2:DescribeNatGateways",
       "ec2:DescribeNetworkInterfaces",
@@ -173,7 +174,11 @@ data "aws_iam_policy_document" "terraform" {
     sid = "IAM"
     actions = [
       "iam:AttachRolePolicy",
+      "iam:CreatePolicy",
+      "iam:CreatePolicyVersion",
       "iam:CreateRole",
+      "iam:DeletePolicy",
+      "iam:DeletePolicyVersion",
       "iam:DeleteRole",
       "iam:DetachRolePolicy",
       "iam:CreateInstanceProfile",
@@ -183,12 +188,15 @@ data "aws_iam_policy_document" "terraform" {
       "iam:RemoveRoleFromInstanceProfile",
       "iam:GetOpenIDConnectProvider",
       "iam:GetPolicy",
+      "iam:GetPolicyVersion",
       "iam:GetRole",
       "iam:GetRolePolicy",
       "iam:ListAttachedRolePolicies",
+      "iam:ListPolicyVersions",
       "iam:ListRolePolicies",
       "iam:ListOpenIDConnectProviders",
       "iam:PassRole",
+      "iam:SetDefaultPolicyVersion",
       "iam:TagRole",
       "iam:UntagRole"
     ]
