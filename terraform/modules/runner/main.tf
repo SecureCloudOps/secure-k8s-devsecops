@@ -122,7 +122,7 @@ resource "aws_instance" "runner" {
   iam_instance_profile        = aws_iam_instance_profile.runner.name
   associate_public_ip_address = false
 
-  user_data = <<-EOF
+  user_data = <<-'EOF'
   #!/usr/bin/env bash
   set -euo pipefail
 
