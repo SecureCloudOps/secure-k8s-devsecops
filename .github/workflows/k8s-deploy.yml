@@ -10,10 +10,6 @@ permissions:
   id-token: write
   contents: read
 
-concurrency:
-  group: k8s-deploy-main
-  cancel-in-progress: false
-
 env:
   AWS_REGION: ${{ vars.TF_VAR_AWS_REGION }}
   CLUSTER_NAME: ${{ vars.TF_VAR_CLUSTER_NAME }}
@@ -34,21 +30,11 @@ jobs:
           role-to-assume: ${{ vars.TF_GITHUB_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Set IMAGE_TAG
-        shell: bash
-        run: |
-          if [[ "${{ github.event_name }}" == "workflow_run" ]]; then
-            echo "IMAGE_TAG=${{ github.event.workflow_run.head_sha }}" >> "$GITHUB_ENV"
-          else
-            echo "IMAGE_TAG=${{ github.sha }}" >> "$GITHUB_ENV"
-          fi
-
       - name: Debug (safe)
         run: |
-          echo "AWS_REGION=$AWS_REGION"
-          echo "CLUSTER_NAME=$CLUSTER_NAME"
-          echo "ECR_REPO=$ECR_REPO"
-          echo "IMAGE_TAG=$IMAGE_TAG"
+          echo "AWS_REGION"
+          echo "CLUSTER_NAME"
+          echo "ECR_REPO"
           aws sts get-caller-identity
 
       - name: Get AWS Account ID
@@ -68,8 +54,8 @@ jobs:
         run: |
           kubectl apply -k k8s/base
 
-      - name: Set image to CI commit SHA
+      - name: Set image to commit SHA
         run: |
-          IMAGE_URI="$ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG"
+          IMAGE_URI="$ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:$GITHUB_SHA"
           kubectl -n default set image deployment/secure-api secure-api="$IMAGE_URI"
           kubectl -n default rollout status deployment/secure-api
