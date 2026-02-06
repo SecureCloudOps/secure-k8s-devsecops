@@ -239,6 +239,31 @@ data "aws_iam_policy_document" "terraform" {
     actions   = ["sts:GetCallerIdentity"]
     resources = ["*"]
   }
+
+  statement {
+    sid = "RunnerInstanceLifecycle"
+    actions = [
+      "ec2:StopInstances",
+      "ec2:StartInstances",
+      "ec2:ModifyInstanceAttribute",
+      "ec2:DescribeInstances",
+      "ec2:DescribeInstanceAttribute",
+      "ec2:DescribeVolumes",
+      "ec2:DescribeImages",
+      "ec2:CreateTags"
+    ]
+    resources = ["*"]
+    condition {
+      test     = "StringEquals"
+      variable = "aws:ResourceTag/Project"
+      values   = ["secure-k8s-devsecops"]
+    }
+    condition {
+      test     = "StringEquals"
+      variable = "aws:ResourceTag/Environment"
+      values   = ["dev"]
+    }
+  }
 }
 
 resource "aws_iam_policy" "terraform" {
