@@ -125,6 +125,7 @@ data "aws_iam_policy_document" "terraform" {
       "ec2:DescribeSubnets",
       "ec2:DescribeTags",
       "ec2:DescribeVpcs",
+      "ec2:DescribeVolumes",
       "ec2:DescribeVpcAttribute",
       "ec2:DetachInternetGateway",
       "ec2:DisassociateRouteTable",
