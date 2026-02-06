@@ -12,3 +12,13 @@ output "ecr_repository_url" {
   description = "ECR repository URL."
   value       = module.ecr.repository_url
 }
+
+output "runner_instance_id" {
+  description = "GitHub Actions runner instance ID."
+  value       = module.runner.runner_instance_id
+}
+
+output "runner_private_ip" {
+  description = "GitHub Actions runner private IP."
+  value       = module.runner.runner_private_ip
+}

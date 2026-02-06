@@ -31,3 +31,16 @@ module "ecr" {
 
   name = var.ecr_repo_name
 }
+
+module "runner" {
+  source = "../../modules/runner"
+
+  project_name        = var.project_name
+  environment         = var.environment
+  tags                = var.tags
+  subnet_id           = element(module.vpc.private_subnet_ids, 0)
+  vpc_id              = module.vpc.vpc_id
+  aws_region          = var.aws_region
+  github_repo         = "SecureCloudOps/secure-k8s-devsecops"
+  github_runner_token = var.github_runner_token
+}

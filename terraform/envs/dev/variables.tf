@@ -114,6 +114,12 @@ variable "github_branch" {
   default     = "main"
 }
 
+variable "github_runner_token" {
+  type        = string
+  description = "GitHub Actions runner registration token."
+  sensitive   = true
+}
+
 variable "tags" {
   type        = map(string)
   description = "Tags applied to all resources."
