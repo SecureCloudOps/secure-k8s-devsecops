@@ -122,7 +122,7 @@ resource "aws_instance" "runner" {
   iam_instance_profile        = aws_iam_instance_profile.runner.name
   associate_public_ip_address = false
 
-  user_data = <<-'EOF'
+  user_data = <<-EOF
   #!/usr/bin/env bash
   set -euo pipefail
 
@@ -146,7 +146,7 @@ resource "aws_instance" "runner" {
 
   cd /opt/actions-runner
   RUNNER_VERSION="2.320.0"
-  curl -fsSL -o actions-runner-linux-x64.tar.gz "https://github.com/actions/runner/releases/download/v${RUNNER_VERSION}/actions-runner-linux-x64-${RUNNER_VERSION}.tar.gz"
+  curl -fsSL -o actions-runner-linux-x64.tar.gz "https://github.com/actions/runner/releases/download/v$${RUNNER_VERSION}/actions-runner-linux-x64-$${RUNNER_VERSION}.tar.gz"
   tar xzf actions-runner-linux-x64.tar.gz
   chown -R actions:actions /opt/actions-runner
 
