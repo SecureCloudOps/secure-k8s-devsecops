@@ -107,6 +107,11 @@ resource "aws_iam_role_policy_attachment" "runner" {
   policy_arn = aws_iam_policy.runner.arn
 }
 
+resource "aws_iam_role_policy_attachment" "runner_ssm_managed" {
+  role      = aws_iam_role.runner.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
+
 resource "aws_iam_instance_profile" "runner" {
   name = "${var.project_name}-${var.environment}-runner-profile"
   role = aws_iam_role.runner.name
@@ -122,7 +127,7 @@ resource "aws_instance" "runner" {
   iam_instance_profile        = aws_iam_instance_profile.runner.name
   associate_public_ip_address = false
 
-  user_data = <<-EOF
+  user_data                   = <<-EOF
   #!/usr/bin/env bash
   set -euo pipefail
 
@@ -160,8 +165,11 @@ resource "aws_instance" "runner" {
   ./svc.sh install actions
   ./svc.sh start
   EOF
+  user_data_replace_on_change = true
 
   tags = merge(var.tags, {
-    Name = "${var.project_name}-${var.environment}-runner"
+    Name        = "${var.project_name}-${var.environment}-runner"
+    Project     = var.project_name
+    Environment = var.environment
   })
 }

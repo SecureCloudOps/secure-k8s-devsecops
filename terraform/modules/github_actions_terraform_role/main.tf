@@ -118,6 +118,8 @@ data "aws_iam_policy_document" "terraform" {
       "ec2:DescribeImages",
       "ec2:DescribeInstanceAttribute",
       "ec2:DescribeInstanceCreditSpecifications",
+      "ec2:DescribeInstances",
+      "ec2:DescribeInstanceStatus",
       "ec2:DescribeInternetGateways",
       "ec2:DescribeNatGateways",
       "ec2:DescribeNetworkInterfaces",
@@ -130,9 +132,12 @@ data "aws_iam_policy_document" "terraform" {
       "ec2:DescribeVpcAttribute",
       "ec2:DetachInternetGateway",
       "ec2:DisassociateRouteTable",
+      "ec2:ModifyInstanceAttribute",
       "ec2:ModifySubnetAttribute",
       "ec2:ModifyVpcAttribute",
-      "ec2:ReleaseAddress"
+      "ec2:ReleaseAddress",
+      "ec2:StartInstances",
+      "ec2:StopInstances"
     ]
     # TODO: Scope to VPC/subnet/sg ARNs once stable resource ARNs are known.
     resources = ["*"]
