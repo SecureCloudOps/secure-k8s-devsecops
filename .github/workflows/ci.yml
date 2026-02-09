@@ -3,7 +3,6 @@ name: ci
 on:
   push:
     branches: ["main"]
-  pull_request:
 
 permissions:
   id-token: write
@@ -29,9 +28,11 @@ jobs:
 
       - name: Build image
         run: |
-          IMAGE_URI="${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}:${{ github.sha }}"
-          docker build -t "$IMAGE_URI" ./app
-          echo "IMAGE_URI=$IMAGE_URI" >> "$GITHUB_ENV"
+          IMAGE_URI_SHA="${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}:${{ github.sha }}"
+          IMAGE_URI_LATEST="${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}:latest"
+          docker build -t "$IMAGE_URI_SHA" -t "$IMAGE_URI_LATEST" ./app
+          echo "IMAGE_URI=$IMAGE_URI_SHA" >> "$GITHUB_ENV"
+          echo "IMAGE_URI_LATEST=$IMAGE_URI_LATEST" >> "$GITHUB_ENV"
 
       - name: Trivy scan
         uses: aquasecurity/trivy-action@0.30.0
@@ -44,6 +45,7 @@ jobs:
       - name: Push image
         run: |
           docker push "$IMAGE_URI"
+          docker push "$IMAGE_URI_LATEST"
 
       - name: Output image uri
         run: |
