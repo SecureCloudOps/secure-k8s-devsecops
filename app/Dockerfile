@@ -13,8 +13,7 @@ COPY requirements.txt /app/requirements.txt
 
 RUN python -m venv /opt/venv \
     && /opt/venv/bin/pip install --upgrade pip \
-    && /opt/venv/bin/pip install --no-cache-dir -r /app/requirements.txt \
-    && /opt/venv/bin/pip cache purge
+    && /opt/venv/bin/pip install --no-cache-dir -r /app/requirements.txt
 
 ENV PATH="/opt/venv/bin:$PATH"
 
