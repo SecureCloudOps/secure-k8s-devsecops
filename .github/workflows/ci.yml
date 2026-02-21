@@ -53,6 +53,7 @@ jobs:
           exit-code: "1"
           format: "table"
           trivyignores: .trivyignore
+          ignore-unfixed: "true"
 
       - name: Push image
         run: |

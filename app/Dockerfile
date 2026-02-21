@@ -1,4 +1,8 @@
-FROM python:3.11-slim
+FROM python:3.11.11-slim-bookworm
+
+RUN apt-get update \
+  && apt-get -y upgrade \
+  && rm -rf /var/lib/apt/lists/*
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
