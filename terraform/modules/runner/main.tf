@@ -108,7 +108,7 @@ resource "aws_iam_role_policy_attachment" "runner" {
 }
 
 resource "aws_iam_role_policy_attachment" "runner_ssm_managed" {
-  role      = aws_iam_role.runner.name
+  role       = aws_iam_role.runner.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
 
