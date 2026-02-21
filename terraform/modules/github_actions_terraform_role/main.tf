@@ -107,6 +107,7 @@ data "aws_iam_policy_document" "terraform" {
       "ec2:DeleteNatGateway",
       "ec2:DeleteRoute",
       "ec2:DeleteRouteTable",
+      "ec2:DisassociateAddress",
       "ec2:DeleteSecurityGroup",
       "ec2:DeleteSubnet",
       "ec2:DeleteTags",
@@ -178,36 +179,78 @@ data "aws_iam_policy_document" "terraform" {
   }
 
   statement {
-    sid = "IAM"
+    sid = "IAMRoles"
     actions = [
       "iam:AttachRolePolicy",
-      "iam:CreatePolicy",
-      "iam:CreatePolicyVersion",
       "iam:CreateRole",
-      "iam:DeletePolicy",
-      "iam:DeletePolicyVersion",
       "iam:DeleteRole",
       "iam:DetachRolePolicy",
+      "iam:GetRole",
+      "iam:GetRolePolicy",
+      "iam:ListAttachedRolePolicies",
+      "iam:ListRolePolicies",
+      "iam:DeleteRolePolicy",
+      "iam:PassRole",
+      "iam:TagRole",
+      "iam:UntagRole"
+    ]
+    resources = [
+      "arn:${data.aws_partition.current.partition}:iam::${data.aws_caller_identity.current.account_id}:role/secure-k8s-dev-*"
+    ]
+  }
+
+  statement {
+    sid = "IAMInstanceProfiles"
+    actions = [
       "iam:CreateInstanceProfile",
       "iam:DeleteInstanceProfile",
       "iam:GetInstanceProfile",
       "iam:AddRoleToInstanceProfile",
       "iam:RemoveRoleFromInstanceProfile",
-      "iam:GetOpenIDConnectProvider",
+      "iam:ListInstanceProfilesForRole"
+    ]
+    resources = [
+      "arn:${data.aws_partition.current.partition}:iam::${data.aws_caller_identity.current.account_id}:instance-profile/secure-k8s-dev-*",
+      "arn:${data.aws_partition.current.partition}:iam::${data.aws_caller_identity.current.account_id}:role/secure-k8s-dev-*"
+    ]
+  }
+
+  statement {
+    sid = "IAMPolicies"
+    actions = [
+      "iam:CreatePolicy",
+      "iam:DeletePolicy",
       "iam:GetPolicy",
       "iam:GetPolicyVersion",
-      "iam:GetRole",
-      "iam:GetRolePolicy",
-      "iam:ListAttachedRolePolicies",
       "iam:ListPolicyVersions",
-      "iam:ListRolePolicies",
-      "iam:ListOpenIDConnectProviders",
-      "iam:PassRole",
-      "iam:SetDefaultPolicyVersion",
-      "iam:TagRole",
-      "iam:UntagRole"
+      "iam:CreatePolicyVersion",
+      "iam:DeletePolicyVersion",
+      "iam:SetDefaultPolicyVersion"
     ]
-    # TODO: Scope to specific role/profile ARNs for runner and cluster roles.
+    resources = [
+      "arn:${data.aws_partition.current.partition}:iam::${data.aws_caller_identity.current.account_id}:policy/secure-k8s-dev-*"
+    ]
+  }
+
+  statement {
+    sid = "IAMOIDCProviders"
+    actions = [
+      "iam:GetOpenIDConnectProvider",
+      "iam:ListOpenIDConnectProviders"
+    ]
+    resources = ["*"]
+  }
+
+  statement {
+    sid = "IAMReadForServiceLinkedRoles"
+    actions = [
+      "iam:GetRole",
+      "iam:ListRoles",
+      "iam:GetPolicy",
+      "iam:GetPolicyVersion",
+      "iam:ListAttachedRolePolicies",
+      "iam:ListRolePolicies"
+    ]
     resources = ["*"]
   }
 
