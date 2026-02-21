@@ -138,6 +138,7 @@ resource "aws_instance" "runner" {
 
   dnf -y update
   dnf -y install docker git jq tar gzip unzip
+  dnf -y install libicu openssl-libs krb5-libs zlib libstdc++ glibc-langpack-en
   systemctl enable --now docker
 
   if ! command -v aws >/dev/null 2>&1; then
