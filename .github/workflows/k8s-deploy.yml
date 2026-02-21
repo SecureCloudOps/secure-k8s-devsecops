@@ -52,7 +52,7 @@ jobs:
 
       - name: Kube access check
         run: |
-          kubectl version --short
+          kubectl version --client=true
           kubectl get nodes -o wide
           kubectl get ns
 
