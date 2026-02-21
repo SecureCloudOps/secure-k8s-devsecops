@@ -132,7 +132,7 @@ resource "aws_instance" "runner" {
   set -euo pipefail
 
   dnf -y update
-  dnf -y install docker git jq curl tar gzip
+  dnf -y install docker git jq tar gzip unzip
   systemctl enable --now docker
 
   if ! command -v aws >/dev/null 2>&1; then
