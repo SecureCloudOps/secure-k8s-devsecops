@@ -127,6 +127,11 @@ resource "aws_instance" "runner" {
   iam_instance_profile        = aws_iam_instance_profile.runner.name
   associate_public_ip_address = false
 
+  root_block_device {
+    volume_type = "gp3"
+    volume_size = 30
+  }
+
   user_data                   = <<-EOF
   #!/usr/bin/env bash
   set -euo pipefail
