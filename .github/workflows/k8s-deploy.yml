@@ -50,6 +50,12 @@ jobs:
         run: |
           aws eks update-kubeconfig --name "$CLUSTER_NAME" --region "$AWS_REGION"
 
+      - name: Kube access check
+        run: |
+          kubectl version --short
+          kubectl get nodes -o wide
+          kubectl get ns
+
       - name: Deploy manifests
         run: |
           kubectl apply -k k8s/base
