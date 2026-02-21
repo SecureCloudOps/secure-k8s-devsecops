@@ -270,6 +270,30 @@ data "aws_iam_policy_document" "terraform" {
   }
 
   statement {
+    sid = "ECRAuth"
+    actions = [
+      "ecr:GetAuthorizationToken"
+    ]
+    resources = ["*"]
+  }
+
+  statement {
+    sid = "ECRPushPull"
+    actions = [
+      "ecr:BatchCheckLayerAvailability",
+      "ecr:CompleteLayerUpload",
+      "ecr:InitiateLayerUpload",
+      "ecr:PutImage",
+      "ecr:UploadLayerPart",
+      "ecr:BatchGetImage",
+      "ecr:GetDownloadUrlForLayer",
+      "ecr:DescribeRepositories",
+      "ecr:ListImages"
+    ]
+    resources = ["*"]
+  }
+
+  statement {
     sid = "Logs"
     actions = [
       "logs:CreateLogGroup",
