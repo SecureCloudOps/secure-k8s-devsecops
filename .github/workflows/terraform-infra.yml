@@ -49,7 +49,9 @@ env:
 
   TF_VAR_ecr_repo_name: ${{ vars.TF_VAR_ECR_REPO_NAME }}
   TF_VAR_github_repo: ${{ vars.TF_VAR_GITHUB_REPO }}
-  TF_VAR_github_runner_token: ${{ secrets.GH_RUNNER_TOKEN }}
+  TF_VAR_github_app_id: ${{ secrets.GH_APP_ID }}
+  TF_VAR_github_app_installation_id: ${{ secrets.GH_APP_INSTALLATION_ID }}
+  TF_VAR_github_app_private_key_pem: ${{ secrets.GH_APP_PRIVATE_KEY }}
 
 jobs:
   plan:
@@ -79,6 +81,12 @@ jobs:
 
       - name: Terraform validate
         run: terraform -chdir=$TF_WORKDIR validate
+
+      - name: Debug (safe)
+        run: |
+          echo "github_app_id set? -> ${{ secrets.GH_APP_ID != '' }}"
+          echo "github_app_installation_id set? -> ${{ secrets.GH_APP_INSTALLATION_ID != '' }}"
+          echo "github_app_private_key_pem set? -> ${{ secrets.GH_APP_PRIVATE_KEY != '' }}"
 
       - name: Sanity check TF vars present
         run: |
@@ -114,6 +122,12 @@ jobs:
 
       - name: Terraform init
         run: terraform -chdir=$TF_WORKDIR init -input=false
+
+      - name: Debug (safe)
+        run: |
+          echo "github_app_id set? -> ${{ secrets.GH_APP_ID != '' }}"
+          echo "github_app_installation_id set? -> ${{ secrets.GH_APP_INSTALLATION_ID != '' }}"
+          echo "github_app_private_key_pem set? -> ${{ secrets.GH_APP_PRIVATE_KEY != '' }}"
 
       - name: Terraform apply
         run: terraform -chdir=$TF_WORKDIR apply -input=false -auto-approve
