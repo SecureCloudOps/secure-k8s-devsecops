@@ -42,16 +42,6 @@ jobs:
           IMAGE_URI_SHA="$ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:$GITHUB_SHA"
           echo "IMAGE_URI_SHA=$IMAGE_URI_SHA" >> "$GITHUB_ENV"
 
-      - name: Trivy scan
-        uses: aquasecurity/trivy-action@0.30.0
-        with:
-          image-ref: ${{ env.IMAGE_URI_SHA }}
-          severity: "HIGH,CRITICAL"
-          exit-code: "1"
-          format: "table"
-          trivyignores: .trivyignore
-          ignore-unfixed: "true"
-
       - name: Check if image tag already exists
         id: tagcheck
         env:
@@ -79,9 +69,20 @@ jobs:
         run: |
           docker push "$IMAGE_URI_SHA"
 
-      - name: Skip build, tag already exists
-        if: steps.tagcheck.outputs.exists == 'true'
-        run: echo "Image $IMAGE_URI_SHA already exists; skipping build and push."
+      - name: Pull image (existing or pushed)
+        if: steps.tagcheck.outputs.exists == 'true' || steps.tagcheck.outputs.exists != 'true'
+        run: |
+          docker pull "$IMAGE_URI_SHA"
+
+      - name: Trivy scan
+        uses: aquasecurity/trivy-action@0.30.0
+        with:
+          image-ref: ${{ env.IMAGE_URI_SHA }}
+          severity: "HIGH,CRITICAL"
+          exit-code: "1"
+          format: "table"
+          trivyignores: .trivyignore
+          ignore-unfixed: "true"
 
       - name: Output image uri
         run: |
