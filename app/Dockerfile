@@ -9,6 +9,8 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
     PIP_NO_CACHE_DIR=1
 
+RUN python -m pip install --upgrade "pip<27" "setuptools==78.1.1" "wheel>=0.46.2"
+
 RUN addgroup --system app && adduser --system --ingroup app --home /app app
 
 WORKDIR /app
