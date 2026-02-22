@@ -35,32 +35,55 @@ jobs:
           echo "AWS_REGION=$AWS_REGION"
           echo "ECR_REPO=$ECR_REPO"
 
-      - name: Build image
+      - name: Set image URI
         run: |
           test -n "$ECR_REPO"
           ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
           IMAGE_URI_SHA="$ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:$GITHUB_SHA"
-          IMAGE_URI_LATEST="$ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:latest"
-          docker build -t "$IMAGE_URI_SHA" -t "$IMAGE_URI_LATEST" ./app
-          echo "IMAGE_URI=$IMAGE_URI_SHA" >> "$GITHUB_ENV"
-          echo "IMAGE_URI_LATEST=$IMAGE_URI_LATEST" >> "$GITHUB_ENV"
+          echo "IMAGE_URI_SHA=$IMAGE_URI_SHA" >> "$GITHUB_ENV"
 
       - name: Trivy scan
         uses: aquasecurity/trivy-action@0.30.0
         with:
-          image-ref: ${{ env.IMAGE_URI }}
+          image-ref: ${{ env.IMAGE_URI_SHA }}
           severity: "HIGH,CRITICAL"
           exit-code: "1"
           format: "table"
           trivyignores: .trivyignore
           ignore-unfixed: "true"
 
-      - name: Push image
+      - name: Check if image tag already exists
+        id: tagcheck
+        env:
+          AWS_REGION: ${{ env.AWS_REGION }}
+          ECR_REPO: ${{ env.ECR_REPO }}
+          IMAGE_TAG: ${{ github.sha }}
         run: |
-          docker push "$IMAGE_URI"
-          docker push "$IMAGE_URI_LATEST"
+          set -e
+          if aws ecr describe-images \
+              --repository-name "$ECR_REPO" \
+              --image-ids imageTag="$IMAGE_TAG" \
+              --region "$AWS_REGION" >/dev/null 2>&1; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build image
+        if: steps.tagcheck.outputs.exists != 'true'
+        run: |
+          docker build -t "$IMAGE_URI_SHA" ./app
+
+      - name: Push image
+        if: steps.tagcheck.outputs.exists != 'true'
+        run: |
+          docker push "$IMAGE_URI_SHA"
+
+      - name: Skip build, tag already exists
+        if: steps.tagcheck.outputs.exists == 'true'
+        run: echo "Image $IMAGE_URI_SHA already exists; skipping build and push."
 
       - name: Output image uri
         run: |
-          echo "image_uri=$IMAGE_URI" >> "$GITHUB_OUTPUT"
+          echo "image_uri=$IMAGE_URI_SHA" >> "$GITHUB_OUTPUT"
         id: image
