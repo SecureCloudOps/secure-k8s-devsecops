@@ -35,12 +35,14 @@ module "ecr" {
 module "runner" {
   source = "../../modules/runner"
 
-  project_name        = var.project_name
-  environment         = var.environment
-  tags                = var.tags
-  subnet_id           = element(module.vpc.private_subnet_ids, 0)
-  vpc_id              = module.vpc.vpc_id
-  aws_region          = var.aws_region
-  github_repo         = "SecureCloudOps/secure-k8s-devsecops"
-  github_runner_token = var.github_runner_token
+  project_name               = var.project_name
+  environment                = var.environment
+  tags                       = var.tags
+  subnet_id                  = element(module.vpc.private_subnet_ids, 0)
+  vpc_id                     = module.vpc.vpc_id
+  aws_region                 = var.aws_region
+  github_repo                = "SecureCloudOps/secure-k8s-devsecops"
+  github_app_id              = var.github_app_id
+  github_app_installation_id = var.github_app_installation_id
+  github_app_private_key_pem = var.github_app_private_key_pem
 }

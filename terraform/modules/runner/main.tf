@@ -133,46 +133,121 @@ resource "aws_instance" "runner" {
   }
 
   user_data                   = <<-EOF
-  #!/usr/bin/env bash
-  set -euo pipefail
+#!/usr/bin/env bash
+set -euo pipefail
 
-  dnf -y update
-  dnf -y install amazon-ssm-agent
-  systemctl enable --now amazon-ssm-agent
-  dnf -y install docker git jq tar gzip unzip
-  dnf -y install libicu openssl-libs krb5-libs zlib libstdc++ glibc-langpack-en
-  systemctl enable --now docker
+log() { echo "[runner-bootstrap] $${1}"; }
 
-  if ! command -v aws >/dev/null 2>&1; then
-    curl -fsSL https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip -o /tmp/awscliv2.zip
-    dnf -y install unzip
-    unzip -q /tmp/awscliv2.zip -d /tmp
-    /tmp/aws/install
-  fi
+log "Updating packages"
+dnf -y update
 
-  curl -fsSL https://dl.k8s.io/release/v1.29.0/bin/linux/amd64/kubectl -o /usr/local/bin/kubectl
-  chmod +x /usr/local/bin/kubectl
+log "Installing dependencies"
+dnf -y install --allowerasing \
+  amazon-ssm-agent \
+  docker \
+  git \
+  jq \
+  tar \
+  gzip \
+  unzip \
+  curl \
+  openssl \
+  libicu \
+  openssl-libs \
+  krb5-libs \
+  zlib \
+  libstdc++ \
+  glibc-langpack-en
 
-  useradd -m -s /bin/bash actions
-  mkdir -p /opt/actions-runner
-  chown actions:actions /opt/actions-runner
+systemctl enable --now amazon-ssm-agent
+systemctl enable --now docker
 
-  cd /opt/actions-runner
-  RUNNER_VERSION="2.320.0"
-  curl -fsSL -o actions-runner-linux-x64.tar.gz "https://github.com/actions/runner/releases/download/v$${RUNNER_VERSION}/actions-runner-linux-x64-$${RUNNER_VERSION}.tar.gz"
-  tar xzf actions-runner-linux-x64.tar.gz
-  chown -R actions:actions /opt/actions-runner
+log "Install kubectl"
+curl -fsSL https://dl.k8s.io/release/v1.29.0/bin/linux/amd64/kubectl -o /usr/local/bin/kubectl
+chmod +x /usr/local/bin/kubectl
 
-  sudo -u actions ./config.sh --unattended \
-    --url "https://github.com/${var.github_repo}" \
-    --token "${var.github_runner_token}" \
-    --name "${var.runner_name}" \
-    --labels "self-hosted,eks-runner" \
-    --work "_work"
+log "Create actions user and directories"
+id actions >/dev/null 2>&1 || useradd -m -s /bin/bash actions
+mkdir -p /opt/actions-runner
+chown -R actions:actions /opt/actions-runner
 
-  ./svc.sh install actions
-  ./svc.sh start
-  EOF
+log "Write GitHub App private key"
+mkdir -p /opt/actions-runner/auth
+cat > /opt/actions-runner/auth/github_app.pem <<'PEM'
+${var.github_app_private_key_pem}
+PEM
+chmod 600 /opt/actions-runner/auth/github_app.pem
+chown -R actions:actions /opt/actions-runner/auth
+
+log "Download GitHub runner"
+cd /opt/actions-runner
+RUNNER_VERSION="2.320.0"
+curl -fsSL -o actions-runner-linux-x64.tar.gz "https://github.com/actions/runner/releases/download/v$${RUNNER_VERSION}/actions-runner-linux-x64-$${RUNNER_VERSION}.tar.gz"
+tar xzf actions-runner-linux-x64.tar.gz
+chown -R actions:actions /opt/actions-runner
+
+b64url() {
+  openssl base64 -e -A | tr '+/' '-_' | tr -d '='
+}
+
+make_jwt() {
+  local app_id="$${1}"
+  local pem="/opt/actions-runner/auth/github_app.pem"
+  local iat exp header payload unsigned sig
+
+  iat="$$(date +%s)"
+  exp="$$(($${iat} + 540))"
+
+  header="$$(printf '{"alg":"RS256","typ":"JWT"}' | b64url)"
+  payload="$$(printf '{"iat":%s,"exp":%s,"iss":"%s"}' "$${iat}" "$${exp}" "$${app_id}" | b64url)"
+  unsigned="$${header}.$${payload}"
+
+  sig="$$(printf '%s' "$${unsigned}" | openssl dgst -sha256 -sign "$${pem}" | b64url)"
+  printf '%s.%s' "$${unsigned}" "$${sig}"
+}
+
+log "Create GitHub App JWT"
+APP_ID="${var.github_app_id}"
+INSTALL_ID="${var.github_app_installation_id}"
+JWT="$$(make_jwt "$${APP_ID}")"
+
+log "Get installation access token"
+INSTALL_TOKEN="$$(curl -fsSL -X POST \
+  -H "Authorization: Bearer $${JWT}" \
+  -H "Accept: application/vnd.github+json" \
+  "https://api.github.com/app/installations/$${INSTALL_ID}/access_tokens" | jq -r .token)"
+
+if [ -z "$${INSTALL_TOKEN}" ] || [ "$${INSTALL_TOKEN}" = "null" ]; then
+  log "ERROR: failed to get installation token"
+  exit 1
+fi
+
+log "Get runner registration token"
+REPO="${var.github_repo}"
+REG_TOKEN="$$(curl -fsSL -X POST \
+  -H "Authorization: token $${INSTALL_TOKEN}" \
+  -H "Accept: application/vnd.github+json" \
+  "https://api.github.com/repos/$${REPO}/actions/runners/registration-token" | jq -r .token)"
+
+if [ -z "$${REG_TOKEN}" ] || [ "$${REG_TOKEN}" = "null" ]; then
+  log "ERROR: failed to get runner registration token"
+  exit 1
+fi
+
+log "Configure runner"
+sudo -u actions ./config.sh --unattended \
+  --url "https://github.com/$${REPO}" \
+  --token "$${REG_TOKEN}" \
+  --name "${var.runner_name}" \
+  --labels "self-hosted,eks-runner" \
+  --work "_work"
+
+log "Install and start runner service"
+./svc.sh install actions
+./svc.sh start
+
+log "Done"
+EOF
   user_data_replace_on_change = true
 
   tags = merge(var.tags, {

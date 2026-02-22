@@ -41,9 +41,19 @@ variable "github_repo" {
   description = "GitHub repository in OWNER/REPO format."
 }
 
-variable "github_runner_token" {
+variable "github_app_id" {
   type        = string
-  description = "GitHub Actions runner registration token."
+  description = "GitHub App ID."
+}
+
+variable "github_app_installation_id" {
+  type        = string
+  description = "GitHub App Installation ID."
+}
+
+variable "github_app_private_key_pem" {
+  type        = string
+  description = "GitHub App private key PEM."
   sensitive   = true
 }
 
