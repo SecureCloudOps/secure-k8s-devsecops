@@ -16,8 +16,9 @@ WORKDIR /app
 COPY requirements.txt /app/requirements.txt
 
 RUN python -m venv /opt/venv \
-    && /opt/venv/bin/pip install --upgrade pip \
-    && /opt/venv/bin/pip install --no-cache-dir -r /app/requirements.txt
+    && /opt/venv/bin/pip install --upgrade "pip<27" "setuptools==78.1.1" "wheel>=0.46.2"
+
+RUN /opt/venv/bin/pip install --no-cache-dir -r /app/requirements.txt
 
 ENV PATH="/opt/venv/bin:$PATH"
 
