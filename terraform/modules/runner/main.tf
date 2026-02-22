@@ -137,6 +137,8 @@ resource "aws_instance" "runner" {
   set -euo pipefail
 
   dnf -y update
+  dnf -y install amazon-ssm-agent
+  systemctl enable --now amazon-ssm-agent
   dnf -y install docker git jq tar gzip unzip
   dnf -y install libicu openssl-libs krb5-libs zlib libstdc++ glibc-langpack-en
   systemctl enable --now docker
