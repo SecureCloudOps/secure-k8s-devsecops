@@ -231,7 +231,7 @@ INSTALL_URL="https://api.github.com/app/installations/$${INSTALL_ID}/access_toke
 INSTALL_TOKEN_JSON="$$(curl -sS -X POST \
   -H "Authorization: Bearer $${JWT}" \
   -H "Accept: application/vnd.github+json" \
-  -w "\nHTTP_STATUS:%%{http_code}\n" \
+  -w '\nHTTP_STATUS:%{http_code}\n' \
   "$${INSTALL_URL}")"
 INSTALL_HTTP_STATUS="$$(echo "$${INSTALL_TOKEN_JSON}" | sed -n 's/^HTTP_STATUS://p' | tail -n 1)"
 INSTALL_TOKEN_BODY="$$(echo "$${INSTALL_TOKEN_JSON}" | sed '/^HTTP_STATUS:/d')"
