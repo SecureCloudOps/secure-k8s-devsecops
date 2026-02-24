@@ -172,12 +172,11 @@ mkdir -p /opt/actions-runner
 chown -R actions:actions /opt/actions-runner
 
 log "Write GitHub App private key"
-mkdir -p /opt/actions-runner/auth
-cat > /opt/actions-runner/auth/github_app.pem <<'PEM'
+cat > /opt/gh-app.pem <<'PEM'
 ${var.github_app_private_key_pem}
 PEM
-chmod 600 /opt/actions-runner/auth/github_app.pem
-chown -R actions:actions /opt/actions-runner/auth
+chmod 600 /opt/gh-app.pem
+chown actions:actions /opt/gh-app.pem
 
 log "Download GitHub runner"
 cd /opt/actions-runner
@@ -192,7 +191,7 @@ b64url() {
 
 make_jwt() {
   local app_id="$${1}"
-  local pem="/opt/actions-runner/auth/github_app.pem"
+  local pem="/opt/gh-app.pem"
   local iat exp header payload unsigned sig
 
   iat="$$(date +%s)"
@@ -212,7 +211,7 @@ INSTALL_ID="${var.github_app_installation_id}"
 JWT="$$(make_jwt "$${APP_ID}")"
 
 log "Get installation access token"
-INSTALL_TOKEN="$$(curl -fsSL -X POST \
+INSTALL_TOKEN="$$(curl -sS -X POST \
   -H "Authorization: Bearer $${JWT}" \
   -H "Accept: application/vnd.github+json" \
   "https://api.github.com/app/installations/$${INSTALL_ID}/access_tokens" | jq -r .token)"
