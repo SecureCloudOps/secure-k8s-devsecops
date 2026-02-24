@@ -221,19 +221,17 @@ fi
 
 log "Get installation access token"
 INSTALL_URL="https://api.github.com/app/installations/$${INSTALL_ID}/access_tokens"
-INSTALL_TOKEN_JSON="$$(curl -sS -X POST \
+log "INSTALL_URL=$${INSTALL_URL}"
+INSTALL_STATUS="$$(curl -sS -o /tmp/install_token.json -w '%%{http_code}' -X POST \
   -H "Authorization: Bearer $${JWT}" \
   -H "Accept: application/vnd.github+json" \
-  -w \"\\nHTTP_STATUS:%%{http_code}\\n\" \
   "$${INSTALL_URL}")"
-INSTALL_HTTP_STATUS="$$(echo "$${INSTALL_TOKEN_JSON}" | sed -n 's/^HTTP_STATUS://p' | tail -n 1)"
-INSTALL_TOKEN_BODY="$$(echo "$${INSTALL_TOKEN_JSON}" | sed '/^HTTP_STATUS:/d')"
-log "Install token HTTP status: $${INSTALL_HTTP_STATUS}"
-INSTALL_TOKEN="$$(echo "$${INSTALL_TOKEN_BODY}" | jq -r '.token // empty')"
+log "Install token HTTP status: $${INSTALL_STATUS}"
+INSTALL_TOKEN="$$(jq -r '.token // empty' /tmp/install_token.json)"
 
 if [ -z "$${INSTALL_TOKEN}" ]; then
   log "ERROR: failed to get installation token"
-  echo "$${INSTALL_TOKEN_BODY}"
+  cat /tmp/install_token.json
   exit 1
 fi
 
