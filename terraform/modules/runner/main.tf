@@ -172,9 +172,8 @@ mkdir -p /opt/actions-runner
 chown -R actions:actions /opt/actions-runner
 
 log "Write GitHub App private key"
-cat > /opt/gh-app.pem <<'PEM'
-${var.github_app_private_key_pem}
-PEM
+GH_APP_PRIVATE_KEY_B64='${base64encode(var.github_app_private_key_pem)}'
+echo "$GH_APP_PRIVATE_KEY_B64" | base64 -d > /opt/gh-app.pem
 chmod 600 /opt/gh-app.pem
 chown actions:actions /opt/gh-app.pem
 
@@ -206,15 +205,16 @@ make_jwt() {
 }
 
 log "Create GitHub App JWT"
-APP_ID="${var.github_app_id}"
-INSTALL_ID="${var.github_app_installation_id}"
+APP_ID='${var.github_app_id}'
+INSTALL_ID='${var.github_app_installation_id}'
 JWT="$$(make_jwt "$${APP_ID}")"
 
 log "Get installation access token"
+INSTALL_URL="https://api.github.com/app/installations/$${INSTALL_ID}/access_tokens"
 INSTALL_TOKEN="$$(curl -sS -X POST \
   -H "Authorization: Bearer $${JWT}" \
-  -H "Accept: application/vnd.github+json" \
-  "https://api.github.com/app/installations/$${INSTALL_ID}/access_tokens" | jq -r .token)"
+  -H 'Accept: application/vnd.github+json' \
+  "$${INSTALL_URL}" | jq -r .token)"
 
 if [ -z "$${INSTALL_TOKEN}" ] || [ "$${INSTALL_TOKEN}" = "null" ]; then
   log "ERROR: failed to get installation token"
