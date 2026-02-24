@@ -172,8 +172,8 @@ mkdir -p /opt/actions-runner
 chown -R actions:actions /opt/actions-runner
 
 log "Write GitHub App private key"
-GH_APP_PRIVATE_KEY_B64='${base64encode(var.github_app_private_key_pem)}'
-echo "$GH_APP_PRIVATE_KEY_B64" | base64 -d > /opt/gh-app.pem
+GH_APP_PRIVATE_KEY_B64="${base64encode(var.github_app_private_key_pem)}"
+printf '%s' "$${GH_APP_PRIVATE_KEY_B64}" | base64 --decode > /opt/gh-app.pem
 chmod 600 /opt/gh-app.pem
 chown actions:actions /opt/gh-app.pem
 
@@ -204,16 +204,23 @@ make_jwt() {
   printf '%s.%s' "$${unsigned}" "$${sig}"
 }
 
-log "Create GitHub App JWT"
 APP_ID="${var.github_app_id}"
 INSTALL_ID="${var.github_app_installation_id}"
 REPO="${var.github_repo}"
-JWT="$$(make_jwt "$${APP_ID}")"
 
 if [ -z "$${APP_ID}" ] || [ -z "$${INSTALL_ID}" ] || [ -z "$${REPO}" ]; then
   log "ERROR: missing APP_ID/INSTALL_ID/REPO"
   exit 1
 fi
+
+log "Write GitHub App private key"
+GH_APP_PRIVATE_KEY_B64="${base64encode(var.github_app_private_key_pem)}"
+printf '%s' "$${GH_APP_PRIVATE_KEY_B64}" | base64 --decode > /opt/gh-app.pem
+chmod 600 /opt/gh-app.pem
+chown actions:actions /opt/gh-app.pem
+
+log "Create GitHub App JWT"
+JWT="$$(make_jwt "$${APP_ID}")"
 if [ -z "$${JWT}" ]; then
   log "ERROR: failed to create JWT"
   exit 1
@@ -221,17 +228,19 @@ fi
 
 log "Get installation access token"
 INSTALL_URL="https://api.github.com/app/installations/$${INSTALL_ID}/access_tokens"
-log "INSTALL_URL=$${INSTALL_URL}"
-INSTALL_STATUS="$$(curl -sS -o /tmp/install_token.json -w '%%{http_code}' -X POST \
+INSTALL_TOKEN_JSON="$$(curl -sS -X POST \
   -H "Authorization: Bearer $${JWT}" \
   -H "Accept: application/vnd.github+json" \
+  -w "\nHTTP_STATUS:%%{http_code}\n" \
   "$${INSTALL_URL}")"
-log "Install token HTTP status: $${INSTALL_STATUS}"
-INSTALL_TOKEN="$$(jq -r '.token // empty' /tmp/install_token.json)"
+INSTALL_HTTP_STATUS="$$(echo "$${INSTALL_TOKEN_JSON}" | sed -n 's/^HTTP_STATUS://p' | tail -n 1)"
+INSTALL_TOKEN_BODY="$$(echo "$${INSTALL_TOKEN_JSON}" | sed '/^HTTP_STATUS:/d')"
+log "Install token HTTP status: $${INSTALL_HTTP_STATUS}"
+INSTALL_TOKEN="$$(echo "$${INSTALL_TOKEN_BODY}" | jq -r '.token // empty')"
 
 if [ -z "$${INSTALL_TOKEN}" ]; then
   log "ERROR: failed to get installation token"
-  cat /tmp/install_token.json
+  echo "$${INSTALL_TOKEN_BODY}"
   exit 1
 fi
 
@@ -240,7 +249,7 @@ REG_URL="https://api.github.com/repos/$${REPO}/actions/runners/registration-toke
 REG_TOKEN_JSON="$$(curl -sS -X POST \
   -H "Authorization: Bearer $${INSTALL_TOKEN}" \
   -H "Accept: application/vnd.github+json" \
-  -w \"\\nHTTP_STATUS:%%{http_code}\\n\" \
+  -w '\nHTTP_STATUS:%%{http_code}\n' \
   "$${REG_URL}")"
 REG_HTTP_STATUS="$$(echo "$${REG_TOKEN_JSON}" | sed -n 's/^HTTP_STATUS://p' | tail -n 1)"
 REG_TOKEN_BODY="$$(echo "$${REG_TOKEN_JSON}" | sed '/^HTTP_STATUS:/d')"
