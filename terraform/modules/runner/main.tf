@@ -171,12 +171,6 @@ id actions >/dev/null 2>&1 || useradd -m -s /bin/bash actions
 mkdir -p /opt/actions-runner
 chown -R actions:actions /opt/actions-runner
 
-log "Write GitHub App private key"
-GH_APP_PRIVATE_KEY_B64="${base64encode(var.github_app_private_key_pem)}"
-printf '%s' "$${GH_APP_PRIVATE_KEY_B64}" | base64 --decode > /opt/gh-app.pem
-chmod 600 /opt/gh-app.pem
-chown actions:actions /opt/gh-app.pem
-
 log "Download GitHub runner"
 cd /opt/actions-runner
 RUNNER_VERSION="2.320.0"
@@ -228,11 +222,10 @@ fi
 
 log "Get installation access token"
 INSTALL_URL="https://api.github.com/app/installations/$${INSTALL_ID}/access_tokens"
-INSTALL_HTTP_STATUS="$$(curl -sS -o /tmp/install_token.json -w '%%{http_code}' -X POST \
+curl -fsS -o /tmp/install_token.json -X POST \
   -H "Authorization: Bearer $${JWT}" \
   -H "Accept: application/vnd.github+json" \
-  "$${INSTALL_URL}")"
-log "Install token HTTP status: $${INSTALL_HTTP_STATUS}"
+  "$${INSTALL_URL}"
 INSTALL_TOKEN="$$(jq -r '.token // empty' /tmp/install_token.json)"
 
 if [ -z "$${INSTALL_TOKEN}" ]; then
@@ -243,11 +236,10 @@ fi
 
 log "Get runner registration token"
 REG_URL="https://api.github.com/repos/$${REPO}/actions/runners/registration-token"
-REG_TOKEN_HTTP_STATUS="$$(curl -sS -o /tmp/runner_reg_token.json -w '%%{http_code}' -X POST \
+curl -fsS -o /tmp/runner_reg_token.json -X POST \
   -H "Authorization: Bearer $${INSTALL_TOKEN}" \
   -H "Accept: application/vnd.github+json" \
-  "$${REG_URL}")"
-log "Runner token HTTP status: $${REG_TOKEN_HTTP_STATUS}"
+  "$${REG_URL}"
 REG_TOKEN="$$(jq -r '.token // empty' /tmp/runner_reg_token.json)"
 
 if [ -z "$${REG_TOKEN}" ]; then
