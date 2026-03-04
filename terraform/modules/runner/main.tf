@@ -208,8 +208,9 @@ if [ -z "$${APP_ID}" ] || [ -z "$${INSTALL_ID}" ] || [ -z "$${REPO}" ]; then
 fi
 
 log "Write GitHub App private key"
-GH_APP_PRIVATE_KEY_B64="${base64encode(var.github_app_private_key_pem)}"
-printf '%s' "$${GH_APP_PRIVATE_KEY_B64}" | base64 --decode > /opt/gh-app.pem
+cat > /opt/gh-app.pem <<'PEM'
+${var.github_app_private_key_pem}
+PEM
 chmod 600 /opt/gh-app.pem
 chown actions:actions /opt/gh-app.pem
 
@@ -237,7 +238,7 @@ fi
 log "Get runner registration token"
 REG_URL="https://api.github.com/repos/$${REPO}/actions/runners/registration-token"
 curl -fsS -o /tmp/runner_reg_token.json -X POST \
-  -H "Authorization: Bearer $${INSTALL_TOKEN}" \
+  -H "Authorization: token $${INSTALL_TOKEN}" \
   -H "Accept: application/vnd.github+json" \
   "$${REG_URL}"
 REG_TOKEN="$$(jq -r '.token // empty' /tmp/runner_reg_token.json)"
