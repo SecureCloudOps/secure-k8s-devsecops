@@ -154,6 +154,9 @@ jobs:
       - name: Terraform init
         run: terraform -chdir=$TF_WORKDIR init -input=false
 
+      - name: Destroy node group first
+        run: terraform -chdir=$TF_WORKDIR destroy -auto-approve -target=module.eks.aws_eks_node_group.this
+
       - name: Pre-destroy cleanup (k8s)
         run: |
           curl -fsSL https://dl.k8s.io/release/$(curl -fsSL https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl -o /tmp/kubectl
