@@ -157,6 +157,21 @@ jobs:
       - name: Destroy node group first
         run: terraform -chdir=$TF_WORKDIR destroy -auto-approve -target=module.eks.aws_eks_node_group.this
 
+      - name: Wait for node groups to be deleted
+        run: |
+          set -euo pipefail
+          for i in {1..30}; do
+            count=$(aws eks list-nodegroups --cluster-name "$TF_VAR_cluster_name" --region us-east-1 --query 'length(nodegroups)' --output text)
+            if [ "$count" = "0" ]; then
+              echo "Node groups deleted."
+              exit 0
+            fi
+            echo "Node groups still present ($count). Waiting..."
+            sleep 20
+          done
+          echo "Timed out waiting for node groups to delete."
+          exit 1
+
       - name: Pre-destroy cleanup (k8s)
         run: |
           curl -fsSL https://dl.k8s.io/release/$(curl -fsSL https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl -o /tmp/kubectl
