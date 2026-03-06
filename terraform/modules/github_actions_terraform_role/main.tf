@@ -160,6 +160,12 @@ data "aws_iam_policy_document" "terraform" {
   statement {
     sid = "EKS"
     actions = [
+      "eks:AssociateAccessPolicy",
+      "eks:CreateAccessEntry",
+      "eks:DeleteAccessEntry",
+      "eks:DisassociateAccessPolicy",
+      "eks:ListAccessEntries",
+      "eks:ListAssociatedAccessPolicies",
       "eks:CreateCluster",
       "eks:DeleteCluster",
       "eks:DescribeCluster",
