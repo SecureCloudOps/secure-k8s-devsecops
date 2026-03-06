@@ -12,3 +12,8 @@ output "runner_security_group_id" {
   description = "Security group ID for the runner instance."
   value       = aws_security_group.runner.id
 }
+
+output "runner_role_arn" {
+  description = "IAM role ARN attached to the runner instance profile."
+  value       = aws_iam_role.runner.arn
+}

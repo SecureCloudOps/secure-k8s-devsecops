@@ -46,3 +46,19 @@ module "runner" {
   github_app_installation_id = var.github_app_installation_id
   github_app_private_key_pem = var.github_app_private_key_pem
 }
+
+resource "aws_eks_access_entry" "runner" {
+  cluster_name  = module.eks.cluster_name
+  principal_arn = module.runner.runner_role_arn
+  type          = "STANDARD"
+}
+
+resource "aws_eks_access_policy_association" "runner_admin" {
+  cluster_name  = module.eks.cluster_name
+  principal_arn = module.runner.runner_role_arn
+  policy_arn    = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+
+  access_scope {
+    type = "cluster"
+  }
+}
