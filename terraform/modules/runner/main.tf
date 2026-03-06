@@ -187,14 +187,14 @@ make_jwt() {
   local pem="/opt/gh-app.pem"
   local iat exp header payload unsigned sig
 
-  iat="$$(date +%s)"
-  exp="$$(($${iat} + 540))"
+  iat="$(date +%s)"
+  exp="$(( $${iat} + 540 ))"
 
-  header="$$(printf '{"alg":"RS256","typ":"JWT"}' | b64url)"
-  payload="$$(printf '{"iat":%s,"exp":%s,"iss":"%s"}' "$${iat}" "$${exp}" "$${app_id}" | b64url)"
+  header="$(printf '{"alg":"RS256","typ":"JWT"}' | b64url)"
+  payload="$(printf '{"iat":%s,"exp":%s,"iss":"%s"}' "$${iat}" "$${exp}" "$${app_id}" | b64url)"
   unsigned="$${header}.$${payload}"
 
-  sig="$$(printf '%s' "$${unsigned}" | openssl dgst -sha256 -sign "$${pem}" | b64url)"
+  sig="$(printf '%s' "$${unsigned}" | openssl dgst -sha256 -sign "$${pem}" | b64url)"
   printf '%s.%s' "$${unsigned}" "$${sig}"
 }
 
@@ -215,7 +215,7 @@ chmod 600 /opt/gh-app.pem
 chown actions:actions /opt/gh-app.pem
 
 log "Create GitHub App JWT"
-JWT="$$(make_jwt "$${APP_ID}")"
+JWT="$(make_jwt "$${APP_ID}")"
 if [ -z "$${JWT}" ]; then
   log "ERROR: failed to create JWT"
   exit 1
@@ -227,7 +227,7 @@ curl -fsS -o /tmp/install_token.json -X POST \
   -H "Authorization: Bearer $${JWT}" \
   -H "Accept: application/vnd.github+json" \
   "$${INSTALL_URL}"
-INSTALL_TOKEN="$$(jq -r '.token // empty' /tmp/install_token.json)"
+INSTALL_TOKEN="$(jq -r '.token // empty' /tmp/install_token.json)"
 
 if [ -z "$${INSTALL_TOKEN}" ]; then
   log "ERROR: failed to get installation token"
@@ -241,7 +241,7 @@ curl -fsS -o /tmp/runner_reg_token.json -X POST \
   -H "Authorization: token $${INSTALL_TOKEN}" \
   -H "Accept: application/vnd.github+json" \
   "$${REG_URL}"
-REG_TOKEN="$$(jq -r '.token // empty' /tmp/runner_reg_token.json)"
+REG_TOKEN="$(jq -r '.token // empty' /tmp/runner_reg_token.json)"
 
 if [ -z "$${REG_TOKEN}" ]; then
   log "ERROR: failed to get runner registration token"
