@@ -157,6 +157,17 @@ jobs:
       - name: Destroy node group first
         run: terraform -chdir=$TF_WORKDIR destroy -auto-approve -target=module.eks.aws_eks_node_group.this
 
+      - name: Force delete remaining node groups
+        run: |
+          set -euo pipefail
+          ngs=$(aws eks list-nodegroups --cluster-name "$TF_VAR_cluster_name" --region us-east-1 --query 'nodegroups' --output text)
+          if [ -n "$ngs" ]; then
+            for ng in $ngs; do
+              echo "Deleting nodegroup: $ng"
+              aws eks delete-nodegroup --cluster-name "$TF_VAR_cluster_name" --nodegroup-name "$ng" --region us-east-1 || true
+            done
+          fi
+
       - name: Wait for node groups to be deleted
         run: |
           set -euo pipefail
