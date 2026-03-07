@@ -183,6 +183,9 @@ jobs:
           echo "Timed out waiting for node groups to delete."
           exit 1
 
+      - name: Debug nodegroups before cluster delete
+        run: aws eks list-nodegroups --cluster-name "$TF_VAR_cluster_name" --region us-east-1
+
       - name: Pre-destroy cleanup (k8s)
         run: |
           curl -fsSL https://dl.k8s.io/release/$(curl -fsSL https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl -o /tmp/kubectl
