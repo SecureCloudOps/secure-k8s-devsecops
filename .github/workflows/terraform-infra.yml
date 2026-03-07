@@ -130,7 +130,7 @@ jobs:
           echo "github_app_private_key_pem set? -> ${{ secrets.GH_APP_PRIVATE_KEY != '' }}"
 
       - name: Terraform apply
-        run: terraform -chdir=$TF_WORKDIR apply -input=false -auto-approve -replace=module.runner.aws_instance.runner
+        run: terraform -chdir=$TF_WORKDIR apply -input=false -auto-approve
 
   destroy:
     if: ${{ inputs.action == 'destroy' && inputs.confirm_destroy == 'DESTROY' }}
@@ -153,38 +153,6 @@ jobs:
 
       - name: Terraform init
         run: terraform -chdir=$TF_WORKDIR init -input=false
-
-      - name: Destroy node group first
-        run: terraform -chdir=$TF_WORKDIR destroy -auto-approve -target=module.eks.aws_eks_node_group.this
-
-      - name: Force delete remaining node groups
-        run: |
-          set -euo pipefail
-          ngs=$(aws eks list-nodegroups --cluster-name "$TF_VAR_cluster_name" --region us-east-1 --query 'nodegroups' --output text)
-          if [ -n "$ngs" ]; then
-            for ng in $ngs; do
-              echo "Deleting nodegroup: $ng"
-              aws eks delete-nodegroup --cluster-name "$TF_VAR_cluster_name" --nodegroup-name "$ng" --region us-east-1 || true
-            done
-          fi
-
-      - name: Wait for node groups to be deleted
-        run: |
-          set -euo pipefail
-          for i in {1..30}; do
-            count=$(aws eks list-nodegroups --cluster-name "$TF_VAR_cluster_name" --region us-east-1 --query 'length(nodegroups)' --output text)
-            if [ "$count" = "0" ]; then
-              echo "Node groups deleted."
-              exit 0
-            fi
-            echo "Node groups still present ($count). Waiting..."
-            sleep 20
-          done
-          echo "Timed out waiting for node groups to delete."
-          exit 1
-
-      - name: Debug nodegroups before cluster delete
-        run: aws eks list-nodegroups --cluster-name "$TF_VAR_cluster_name" --region us-east-1
 
       - name: Pre-destroy cleanup (k8s)
         run: |
