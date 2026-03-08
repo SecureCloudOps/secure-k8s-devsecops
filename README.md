@@ -25,12 +25,20 @@ End-to-end, production-minded DevSecOps platform on AWS EKS. This repo demonstra
 - Private EKS control plane endpoint with managed node groups in private subnets
 - ECR for container images with immutable tags and scan-on-push
 - Ingress via NGINX and TLS via cert-manager
-- TODO: add architecture diagram in `docs/architecture.png`
+
+![Architecture Diagram](docs/Architecture/architecture.png)
 
 ## What You Can Demo in 5 Minutes
 - **Provision**: Run `terraform-infra` workflow (manual `apply`)
 - **Build + Scan**: CI builds image, scans with Trivy, pushes immutable SHA tag to ECR
 - **Deploy**: `k8s-deploy` workflow runs on the self-hosted runner inside the VPC
+
+## Screenshots
+![Terraform Apply](docs/screenshots/01-terraform-apply.png)
+![CI Green](docs/screenshots/02-ci-green.png)
+![ECR Tags](docs/screenshots/03-ecr-tags.png)
+![EKS Cluster](docs/screenshots/04-eks-nodegroup.png)
+![K8s Deploy](docs/screenshots/05-k8s-deploy.png)
 
 ## Security Highlights
 - OIDC-based GitHub Actions access with no long-lived credentials
