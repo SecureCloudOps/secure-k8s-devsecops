@@ -130,7 +130,7 @@ jobs:
           echo "github_app_private_key_pem set? -> ${{ secrets.GH_APP_PRIVATE_KEY != '' }}"
 
       - name: Terraform apply
-        run: terraform -chdir=$TF_WORKDIR apply -input=false -auto-approve -replace=module.runner.aws_instance.runner
+        run: terraform -chdir=$TF_WORKDIR apply -input=false -auto-approve
 
   destroy:
     if: ${{ inputs.action == 'destroy' && inputs.confirm_destroy == 'DESTROY' }}
