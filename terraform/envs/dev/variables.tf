@@ -108,6 +108,15 @@ variable "github_repo" {
   }
 }
 
+variable "github_actions_role_arn" {
+  type        = string
+  description = "IAM role ARN assumed by GitHub Actions for deploy workflows."
+  validation {
+    condition     = length(var.github_actions_role_arn) > 0
+    error_message = "github_actions_role_arn must be a non-empty string."
+  }
+}
+
 variable "github_branch" {
   type        = string
   description = "GitHub branch allowed to assume the role."
