@@ -163,6 +163,7 @@ data "aws_iam_policy_document" "terraform" {
       "eks:AssociateAccessPolicy",
       "eks:CreateAccessEntry",
       "eks:DeleteAccessEntry",
+      "eks:DescribeAccessEntry",
       "eks:DisassociateAccessPolicy",
       "eks:ListAccessEntries",
       "eks:ListAssociatedAccessPolicies",
