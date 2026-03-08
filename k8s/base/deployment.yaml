@@ -34,7 +34,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: secure-api
-          image: registry.example.com/secure-api:0.0.0
+          image: 767828729088.dkr.ecr.us-east-1.amazonaws.com/secure-api:placeholder
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
