@@ -12,7 +12,7 @@
 - Mohamed Mohamed
 - mohamed0395@gmail.com
 
-End-to-end, production-minded DevSecOps platform on AWS EKS. This repo demonstrates secure infrastructure provisioning, OIDC‑based CI/CD, container supply chain scanning, and private‑cluster deployment via a self-hosted runner in the VPC.
+Teams often struggle to ship quickly because security, compliance, and private-cluster networking requirements are handled late, manually, or with brittle credentials—creating release delays and audit risk. This end-to-end, production-minded DevSecOps platform on AWS EKS shows how to solve that business problem with secure infrastructure provisioning, OIDC‑based CI/CD, container supply chain scanning, and private‑cluster deployment via a self-hosted runner in the VPC.
 
 ## Why This Stands Out
 - **Real-world constraints**: private EKS endpoint, no static credentials, immutable image tags
